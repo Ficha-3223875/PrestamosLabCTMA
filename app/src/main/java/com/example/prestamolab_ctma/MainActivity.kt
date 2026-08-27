@@ -105,7 +105,7 @@ fun PrestamoLabApp(vm: PrestamoViewModel = viewModel()) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("PréstamoLab CTMA", fontWeight = FontWeight.Bold) },
+                title = { Text("PréstamoLab CTMA ANT", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     if (screen !is AppScreen.Catalogo) {
                         IconButton(onClick = { back() }) {
