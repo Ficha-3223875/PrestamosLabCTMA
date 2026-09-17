@@ -3,28 +3,21 @@ package com.example.prestamoslabctma
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.prestamoslabctma.repository.InMemoryPrestamoRepository
+import com.example.prestamoslabctma.ui.PrestamoLabApp
+import com.example.prestamoslabctma.ui.theme.PrestamosLabCtmaTheme
+import com.example.prestamoslabctma.viewmodel.PrestamoViewModel
+import com.example.prestamoslabctma.viewmodel.PrestamoViewModelFactory
 
 class MainActivity : ComponentActivity() {
-
-    private val repository = MemoriaReporteRepository()
-
-    private val crearReporteViewModel: CrearReporteViewModel by viewModels {
-        CrearReporteViewModelFactory(repository)
-    }
-
+    private val repository by lazy { InMemoryPrestamoRepository() }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
-            MaterialTheme {
-                Surface {
-                    CrearReporteRoute(
-                        viewModel = crearReporteViewModel
-                    )
-                }
+            PrestamosLabCtmaTheme {
+                val vm: PrestamoViewModel = viewModel(factory = PrestamoViewModelFactory(repository))
+                PrestamoLabApp(vm)
             }
         }
     }
