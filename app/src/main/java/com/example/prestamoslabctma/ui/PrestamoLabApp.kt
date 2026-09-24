@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.prestamoslabctma.navigation.Routes
 import com.example.prestamoslabctma.ui.screens.*
 import com.example.prestamoslabctma.viewmodel.PrestamoViewModel
@@ -18,8 +19,12 @@ fun PrestamoLabApp(vm: PrestamoViewModel) {
     val nav = rememberNavController()
     val current by nav.currentBackStackEntryAsState()
     val route = current?.destination?.route
+    val ui by vm.uiState.collectAsStateWithLifecycle()
+    val snackbar = remember { SnackbarHostState() }
+    LaunchedEffect(ui.mensaje) { ui.mensaje?.let { snackbar.showSnackbar(it); vm.limpiarMensaje() } }
     Scaffold(
-        topBar = { TopAppBar(title = { Text("PréstamoLab CTMA") }) },
+        topBar = { TopAppBar(title = { Text("PréstamoLab CTMA") }, actions = { TextButton(onClick = { nav.navigate(Routes.PREFERENCIAS) }) { Text("Ajustes") } }) },
+        snackbarHost = { SnackbarHost(snackbar) },
         bottomBar = {
             if (route == Routes.CATALOGO || route == Routes.MIS_SOLICITUDES) NavigationBar {
                 NavigationBarItem(selected = route == Routes.CATALOGO, onClick = { nav.navigate(Routes.CATALOGO) { popUpTo(Routes.CATALOGO); launchSingleTop = true } }, icon = { Text("▦") }, label = { Text("Catálogo") })
@@ -33,6 +38,7 @@ fun PrestamoLabApp(vm: PrestamoViewModel) {
             composable(Routes.EQUIPO, arguments=listOf(navArgument("equipoId"){type=NavType.IntType})) { back -> EquipoDetalleScreen(vm, back.arguments?.getInt("equipoId") ?: -1, { nav.popBackStack() }, { nav.navigate(Routes.solicitar(it)) }) }
             composable(Routes.SOLICITAR, arguments=listOf(navArgument("equipoId"){type=NavType.IntType})) { back -> SolicitarScreen(vm, back.arguments?.getInt("equipoId") ?: -1, { nav.popBackStack() }) { nav.navigate(Routes.MIS_SOLICITUDES) { popUpTo(Routes.CATALOGO) } } }
             composable(Routes.SOLICITUD, arguments=listOf(navArgument("solicitudId"){type=NavType.IntType})) { back -> SolicitudDetalleScreen(vm, back.arguments?.getInt("solicitudId") ?: -1) { nav.popBackStack() } }
+            composable(Routes.PREFERENCIAS) { PreferenciasScreen(vm) { nav.popBackStack() } }
         }
     }
 }

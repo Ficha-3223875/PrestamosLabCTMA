@@ -15,11 +15,11 @@ class InMemoryPrestamoRepository(
     override val solicitudes: StateFlow<List<SolicitudPrestamo>> = _solicitudes.asStateFlow()
     private var siguienteId = 1
 
-    override fun obtenerEquipo(id: Int) = _equipos.value.find { it.id == id }
-    override fun obtenerSolicitud(id: Int) = _solicitudes.value.find { it.id == id }
+    override suspend fun inicializar() = Unit
+    override suspend fun obtenerEquipo(id: Int) = _equipos.value.find { it.id == id }
+    override suspend fun obtenerSolicitud(id: Int) = _solicitudes.value.find { it.id == id }
 
-    @Synchronized
-    override fun crearSolicitud(equipoId: Int, ambiente: String, proposito: String, duracion: Int): Result<SolicitudPrestamo> {
+    override suspend fun crearSolicitud(equipoId: Int, ambiente: String, proposito: String, duracion: Int): Result<SolicitudPrestamo> {
         val equipo = obtenerEquipo(equipoId) ?: return Result.failure(IllegalArgumentException("Equipo inexistente"))
         if (equipo.estado != EstadoEquipo.DISPONIBLE) return Result.failure(IllegalStateException("El equipo no está disponible"))
         if (ambiente.isBlank()) return Result.failure(IllegalArgumentException("El ambiente o destino es obligatorio"))
@@ -33,14 +33,34 @@ class InMemoryPrestamoRepository(
         return Result.success(solicitud)
     }
 
-    @Synchronized
-    override fun cancelarSolicitud(id: Int): Result<Unit> {
+    override suspend fun cancelarSolicitud(id: Int): Result<Unit> {
         val solicitud = obtenerSolicitud(id) ?: return Result.failure(IllegalArgumentException("Solicitud inexistente"))
         if (solicitud.estado != EstadoSolicitud.SOLICITADA) return Result.failure(IllegalStateException("Solo se puede cancelar una solicitud SOLICITADA"))
         _solicitudes.value = _solicitudes.value.map { if (it.id == id) it.copy(estado = EstadoSolicitud.CANCELADA) else it }
         _equipos.value = _equipos.value.map { if (it.id == solicitud.equipoId) it.copy(estado = EstadoEquipo.DISPONIBLE) else it }
         return Result.success(Unit)
     }
+
+    override suspend fun registrarEntrega(id: Int): Result<Unit> {
+        val solicitud = obtenerSolicitud(id) ?: return Result.failure(IllegalArgumentException("Solicitud inexistente"))
+        if (solicitud.estado !in setOf(EstadoSolicitud.SOLICITADA, EstadoSolicitud.APROBADA)) return Result.failure(IllegalStateException("La solicitud no se puede entregar"))
+        _solicitudes.value = _solicitudes.value.map { if (it.id == id) it.copy(estado = EstadoSolicitud.ENTREGADA) else it }
+        _equipos.value = _equipos.value.map { if (it.id == solicitud.equipoId) it.copy(estado = EstadoEquipo.PRESTADO) else it }
+        return Result.success(Unit)
+    }
+
+    override suspend fun registrarDevolucion(id: Int, evidencia: EvidenciaDevolucion): Result<Unit> {
+        val solicitud = obtenerSolicitud(id) ?: return Result.failure(IllegalArgumentException("Solicitud inexistente"))
+        if (solicitud.estado != EstadoSolicitud.ENTREGADA) return Result.failure(IllegalStateException("Solo se devuelve un préstamo ENTREGADO"))
+        if (evidencia.uri.isBlank()) return Result.failure(IllegalArgumentException("Selecciona una evidencia fotográfica"))
+        _solicitudes.value = _solicitudes.value.map {
+            if (it.id == id) it.copy(estado = EstadoSolicitud.DEVUELTA, devolucionEn = System.currentTimeMillis(), evidenciaUri = evidencia.uri, evidenciaNombre = evidencia.nombre, evidenciaTipo = evidencia.tipoMime, sensorAcelerometroVerificado = evidencia.acelerometroVerificado) else it
+        }
+        _equipos.value = _equipos.value.map { if (it.id == solicitud.equipoId) it.copy(estado = EstadoEquipo.DISPONIBLE) else it }
+        return Result.success(Unit)
+    }
+
+    override suspend fun sincronizar(): Result<Int> = Result.success(_solicitudes.value.size)
 
     companion object {
         fun datosDemo() = listOf(

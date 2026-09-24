@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">PrestamosLabCtma</string>
+    <string name="app_name">PréstamoLab CTMA</string>
+    <string name="canal_devoluciones">Recordatorios de devolución</string>
 </resources>

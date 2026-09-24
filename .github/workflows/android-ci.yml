@@ -18,6 +18,13 @@ jobs:
       - run: chmod +x gradlew
       - run: ./gradlew testDebugUnitTest lintDebug assembleDebug
       - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reportes-calidad
+          path: |
+            app/build/reports/tests/
+            app/build/reports/lint-results-debug.html
+      - uses: actions/upload-artifact@v4
         with:
           name: prestamolab-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
