@@ -11,7 +11,7 @@ on:
 
 jobs:
   test:
-    name: Ejecutar pruebas unitarias
+    name: Pruebas, Lint y APK
     runs-on: ubuntu-latest
 
     steps:
@@ -29,3 +29,15 @@ jobs:
 
       - name: Ejecutar pruebas unitarias
         run: ./gradlew testDebugUnitTest
+
+      - name: Ejecutar Android Lint
+        run: ./gradlew lintDebug
+
+      - name: Generar APK Debug
+        run: ./gradlew assembleDebug
+
+      - name: Guardar APK como Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PrestamoLabCTMA-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
