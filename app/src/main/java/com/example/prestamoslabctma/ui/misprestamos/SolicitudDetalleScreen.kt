@@ -26,7 +26,8 @@ import com.example.prestamoslabctma.viewmodel.PrestamoViewModel
 fun SolicitudDetalleScreen(
     solicitudId: Int,
     viewModel: PrestamoViewModel,
-    onVolver: () -> Unit
+    onVolver: () -> Unit,
+    onSolicitudCancelada: () -> Unit
 ) {
     val solicitud = viewModel.obtenerSolicitud(solicitudId)
 
@@ -159,6 +160,9 @@ fun SolicitudDetalleScreen(
             Button(
                 onClick = {
                     viewModel.cancelarSolicitud(solicitud.id)
+
+                    // Volver automáticamente a Mis solicitudes
+                    onSolicitudCancelada()
                 },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp)
@@ -182,15 +186,6 @@ fun SolicitudDetalleScreen(
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-        }
-
-        viewModel.uiState.value.mensaje?.let { mensaje ->
-
-            Text(
-                text = mensaje,
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.bodyMedium
-            )
         }
 
         OutlinedButton(

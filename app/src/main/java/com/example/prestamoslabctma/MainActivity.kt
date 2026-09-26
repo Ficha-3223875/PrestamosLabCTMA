@@ -171,8 +171,19 @@ fun AppNavigation() {
                 SolicitudDetalleScreen(
                     solicitudId = solicitudId,
                     viewModel = viewModel,
+
+                    // Botón normal "Volver"
                     onVolver = {
                         navController.popBackStack()
+                    },
+
+                    // Después de cancelar correctamente,
+                    // volver directamente a Mis solicitudes
+                    onSolicitudCancelada = {
+                        navController.popBackStack(
+                            "mis_solicitudes",
+                            inclusive = false
+                        )
                     }
                 )
             }
