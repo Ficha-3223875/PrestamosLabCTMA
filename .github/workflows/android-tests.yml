@@ -50,6 +50,10 @@ jobs:
             arch: x86_64
             profile: pixel_2
             force-avd-creation: true
-            emulator-options: -no-window -no-audio -no-boot-anim
+            emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect
             disable-animations: true
+            cores: 2
+            ram-size: 2048M
+            heap-size: 512M
+            disk-size: 4096M
             script: ./gradlew connectedDebugAndroidTest
