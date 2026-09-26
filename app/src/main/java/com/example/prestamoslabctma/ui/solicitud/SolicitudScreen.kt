@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -56,6 +58,10 @@ fun SolicitudScreen(
         mutableStateOf(false)
     }
 
+    var mostrarConfirmacion by remember {
+        mutableStateOf(false)
+    }
+
     val ambienteValido = ambienteDestino.trim().isNotEmpty()
     val propositoValido = proposito.trim().length in 10..180
     val duracionValida = duracionHoras in 1..8
@@ -96,6 +102,7 @@ fun SolicitudScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(
                 start = 20.dp,
                 end = 20.dp,
@@ -116,6 +123,51 @@ fun SolicitudScreen(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
+        // =========================
+        // INFORMACIÓN DEL USUARIO
+        // =========================
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(18.dp),
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 3.dp
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    text = "Información del usuario",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = uiState.usuario.nombre,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = "Identificación: ${uiState.usuario.identificacion}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Text(
+                    text = "Rol: ${uiState.usuario.rol}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        // =========================
+        // EQUIPO SELECCIONADO
+        // =========================
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -149,6 +201,10 @@ fun SolicitudScreen(
             }
         }
 
+        // =========================
+        // AMBIENTE DE DESTINO
+        // =========================
+
         OutlinedTextField(
             value = ambienteDestino,
             onValueChange = {
@@ -173,6 +229,10 @@ fun SolicitudScreen(
                 style = MaterialTheme.typography.bodySmall
             )
         }
+
+        // =========================
+        // PROPÓSITO
+        // =========================
 
         OutlinedTextField(
             value = proposito,
@@ -200,6 +260,10 @@ fun SolicitudScreen(
                 style = MaterialTheme.typography.bodySmall
             )
         }
+
+        // =========================
+        // DURACIÓN
+        // =========================
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -272,6 +336,10 @@ fun SolicitudScreen(
             )
         }
 
+        // =========================
+        // MENSAJE
+        // =========================
+
         uiState.mensaje?.let { mensaje ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -291,6 +359,10 @@ fun SolicitudScreen(
             }
         }
 
+        // =========================
+        // BOTÓN REVISAR
+        // =========================
+
         Button(
             onClick = {
                 intentoGuardar = true
@@ -301,14 +373,7 @@ fun SolicitudScreen(
                     duracionValida &&
                     !uiState.guardando
                 ) {
-                    viewModel.crearSolicitud(
-                        equipoId = equipoId,
-                        ambienteDestino = ambienteDestino,
-                        proposito = proposito,
-                        duracionHoras = duracionHoras
-                    )
-
-                    onSolicitudCreada()
+                    mostrarConfirmacion = true
                 }
             },
             modifier = Modifier.fillMaxWidth(),
@@ -319,11 +384,15 @@ fun SolicitudScreen(
                 CircularProgressIndicator()
             } else {
                 Text(
-                    text = "Guardar solicitud",
+                    text = "Revisar solicitud",
                     fontWeight = FontWeight.Bold
                 )
             }
         }
+
+        // =========================
+        // BOTÓN CANCELAR
+        // =========================
 
         OutlinedButton(
             onClick = onCancelar,
@@ -332,5 +401,79 @@ fun SolicitudScreen(
         ) {
             Text("Cancelar")
         }
+    }
+
+    // =========================
+    // VENTANA DE CONFIRMACIÓN
+    // =========================
+
+    if (mostrarConfirmacion) {
+
+        AlertDialog(
+            onDismissRequest = {
+                mostrarConfirmacion = false
+            },
+            title = {
+                Text(
+                    text = "Confirmar solicitud",
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+
+                    Text(
+                        text = "Revisa los datos antes de registrar el préstamo."
+                    )
+
+                    Text(
+                        text = "Equipo: ${equipo.nombre}",
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Text(
+                        text = "Ambiente: ${ambienteDestino.trim()}"
+                    )
+
+                    Text(
+                        text = "Propósito: ${proposito.trim()}"
+                    )
+
+                    Text(
+                        text = "Duración: $duracionHoras hora(s)"
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        mostrarConfirmacion = false
+
+                        viewModel.crearSolicitud(
+                            equipoId = equipoId,
+                            ambienteDestino = ambienteDestino,
+                            proposito = proposito,
+                            duracionHoras = duracionHoras
+                        )
+
+                        onSolicitudCreada()
+                    },
+                    enabled = !uiState.guardando
+                ) {
+                    Text("Confirmar solicitud")
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = {
+                        mostrarConfirmacion = false
+                    }
+                ) {
+                    Text("Volver a editar")
+                }
+            }
+        )
     }
 }
