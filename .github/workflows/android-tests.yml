@@ -1,0 +1,31 @@
+name: Android Tests
+
+on:
+  push:
+    branches:
+      - feat/Naurimar
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  test:
+    name: Ejecutar pruebas unitarias
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Dar permisos a Gradle
+        run: chmod +x gradlew
+
+      - name: Ejecutar pruebas unitarias
+        run: ./gradlew testDebugUnitTest
