@@ -14,17 +14,25 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.prestamoslabctma.model.CategoriaEquipo
 import com.example.prestamoslabctma.model.Equipo
 import com.example.prestamoslabctma.model.EstadoEquipo
 import com.example.prestamoslabctma.viewmodel.PrestamoViewModel
@@ -37,6 +45,33 @@ fun CatalogoScreen(
 ) {
     val equipos = viewModel.uiState.value.equipos
 
+    var textoBusqueda by remember {
+        mutableStateOf("")
+    }
+
+    var categoriaSeleccionada by remember {
+        mutableStateOf<CategoriaEquipo?>(null)
+    }
+
+    var menuCategoriaAbierto by remember {
+        mutableStateOf(false)
+    }
+
+    val equiposFiltrados = equipos.filter { equipo ->
+
+        val coincideBusqueda =
+            equipo.nombre.contains(
+                textoBusqueda.trim(),
+                ignoreCase = true
+            )
+
+        val coincideCategoria =
+            categoriaSeleccionada == null ||
+                    equipo.categoria == categoriaSeleccionada
+
+        coincideBusqueda && coincideCategoria
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -48,7 +83,6 @@ fun CatalogoScreen(
             )
     ) {
 
-        // Encabezado
         Text(
             text = "PréstamoLab CTMA",
             style = MaterialTheme.typography.headlineSmall,
@@ -80,7 +114,6 @@ fun CatalogoScreen(
             modifier = Modifier.height(16.dp)
         )
 
-        // Botón de mis solicitudes
         Button(
             onClick = onMisSolicitudesClick,
             modifier = Modifier.fillMaxWidth(),
@@ -93,11 +126,95 @@ fun CatalogoScreen(
         }
 
         Spacer(
-            modifier = Modifier.height(20.dp)
+            modifier = Modifier.height(16.dp)
+        )
+
+        // =========================
+        // BÚSQUEDA - HU-11
+        // =========================
+
+        OutlinedTextField(
+            value = textoBusqueda,
+            onValueChange = {
+                textoBusqueda = it
+            },
+            modifier = Modifier.fillMaxWidth(),
+            label = {
+                Text("Buscar equipo")
+            },
+            placeholder = {
+                Text("Escribe el nombre del equipo")
+            },
+            singleLine = true,
+            shape = RoundedCornerShape(14.dp)
+        )
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        // =========================
+        // FILTRO - HU-12
+        // =========================
+
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+            OutlinedButton(
+                onClick = {
+                    menuCategoriaAbierto = true
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Text(
+                    text = categoriaSeleccionada?.let {
+                        "Categoría: ${textoCategoria(it)}"
+                    } ?: "Filtrar por categoría"
+                )
+            }
+
+            DropdownMenu(
+                expanded = menuCategoriaAbierto,
+                onDismissRequest = {
+                    menuCategoriaAbierto = false
+                }
+            ) {
+
+                DropdownMenuItem(
+                    text = {
+                        Text("Todas las categorías")
+                    },
+                    onClick = {
+                        categoriaSeleccionada = null
+                        menuCategoriaAbierto = false
+                    }
+                )
+
+                CategoriaEquipo.entries.forEach { categoria ->
+
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                textoCategoria(categoria)
+                            )
+                        },
+                        onClick = {
+                            categoriaSeleccionada = categoria
+                            menuCategoriaAbierto = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Spacer(
+            modifier = Modifier.height(18.dp)
         )
 
         Text(
-            text = "Equipos disponibles",
+            text = "Equipos",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold
         )
@@ -106,22 +223,55 @@ fun CatalogoScreen(
             modifier = Modifier.height(10.dp)
         )
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            items(
-                items = equipos,
-                key = { it.id }
-            ) { equipo ->
+        if (equiposFiltrados.isEmpty()) {
 
-                EquipoCard(
-                    equipo = equipo,
-                    onClick = {
-                        onEquipoClick(equipo.id)
-                    }
-                )
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    Text(
+                        text = "No se encontraron equipos",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(6.dp)
+                    )
+
+                    Text(
+                        text = "Prueba con otro nombre o categoría.",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+        } else {
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+
+                items(
+                    items = equiposFiltrados,
+                    key = { it.id }
+                ) { equipo ->
+
+                    EquipoCard(
+                        equipo = equipo,
+                        onClick = {
+                            onEquipoClick(equipo.id)
+                        }
+                    )
+                }
             }
         }
     }
@@ -140,6 +290,7 @@ private fun EquipoCard(
             defaultElevation = 3.dp
         )
     ) {
+
         Column(
             modifier = Modifier.padding(18.dp)
         ) {
@@ -155,7 +306,7 @@ private fun EquipoCard(
             )
 
             Text(
-                text = "Categoría: ${textoCategoria(equipo)}",
+                text = "Categoría: ${textoCategoria(equipo.categoria)}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -232,6 +383,7 @@ private fun EstadoChip(
         shape = RoundedCornerShape(50.dp),
         color = containerColor
     ) {
+
         Text(
             text = texto,
             modifier = Modifier.padding(
@@ -246,13 +398,13 @@ private fun EstadoChip(
 }
 
 private fun textoCategoria(
-    equipo: Equipo
+    categoria: CategoriaEquipo
 ): String {
-    return when (equipo.categoria.name) {
-        "COMPUTO" -> "Cómputo"
-        "AUDIOVISUAL" -> "Audiovisual"
-        "HERRAMIENTA" -> "Herramienta"
-        "LABORATORIO" -> "Laboratorio"
-        else -> "Otro"
+    return when (categoria) {
+        CategoriaEquipo.COMPUTO -> "Cómputo"
+        CategoriaEquipo.AUDIOVISUAL -> "Audiovisual"
+        CategoriaEquipo.HERRAMIENTA -> "Herramienta"
+        CategoriaEquipo.LABORATORIO -> "Laboratorio"
+        CategoriaEquipo.OTRO -> "Otro"
     }
 }
