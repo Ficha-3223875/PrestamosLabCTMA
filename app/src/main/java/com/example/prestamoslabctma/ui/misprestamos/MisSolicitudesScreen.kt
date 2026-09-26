@@ -17,9 +17,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.getValue
 import com.example.prestamoslabctma.model.EstadoSolicitud
 import com.example.prestamoslabctma.model.SolicitudPrestamo
 import com.example.prestamoslabctma.viewmodel.PrestamoViewModel
@@ -29,7 +31,8 @@ fun MisSolicitudesScreen(
     viewModel: PrestamoViewModel,
     onSolicitudClick: (Int) -> Unit
 ) {
-    val solicitudes = viewModel.uiState.value.solicitudes
+    val uiState by viewModel.uiState.collectAsState()
+    val solicitudes = uiState.solicitudes
 
     Column(
         modifier = Modifier

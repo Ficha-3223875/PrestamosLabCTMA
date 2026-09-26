@@ -24,6 +24,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.example.prestamoslabctma.model.CategoriaEquipo
 import com.example.prestamoslabctma.model.Equipo
 import com.example.prestamoslabctma.model.EstadoEquipo
@@ -43,7 +46,8 @@ fun CatalogoScreen(
     onEquipoClick: (Int) -> Unit,
     onMisSolicitudesClick: () -> Unit = {}
 ) {
-    val equipos = viewModel.uiState.value.equipos
+    val uiState by viewModel.uiState.collectAsState()
+    val equipos = uiState.equipos
 
     var textoBusqueda by remember {
         mutableStateOf("")
