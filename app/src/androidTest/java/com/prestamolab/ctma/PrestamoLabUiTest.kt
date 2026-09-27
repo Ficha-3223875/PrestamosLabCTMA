@@ -1,25 +1,69 @@
 package com.prestamolab.ctma
 
-import androidx.activity.compose.setContent
-import androidx.compose.ui.test.assertExists
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import com.prestamolab.ctma.model.Equipment
+import com.prestamolab.ctma.model.EquipmentState
+import com.prestamolab.ctma.ui.DeviceStatusScreen
+import com.prestamolab.ctma.ui.HomeScreen
 import org.junit.Rule
 import org.junit.Test
 
 class PrestamoLabUiTest {
+
     @get:Rule
-    val composeRule = createAndroidComposeRule<MainActivity>()
+    val rule = createComposeRule()
 
     @Test
-    fun home_displays_equipment_and_loan_flow() {
-        composeRule.onNodeWithText("PréstamoLab CTMA").assertExists()
-        composeRule.onNodeWithText("Multímetro digital").assertExists()
-        composeRule.onNodeWithText("Disponible").assertExists()
+    fun catalog_and_device_capability_are_visible() {
 
-        composeRule.onNodeWithText("Multímetro digital").performClick()
-        composeRule.onNodeWithText("Solicitar préstamo").assertExists()
-        composeRule.onNodeWithText("Solicitar préstamo").performClick()
-        composeRule.onNodeWithText("Préstamo solicitado correctamente.").assertExists()
+        val showDevice = mutableStateOf(false)
+
+        rule.setContent {
+            MaterialTheme {
+                if (showDevice.value) {
+                    DeviceStatusScreen(
+                        onBack = { showDevice.value = false }
+                    )
+                } else {
+                    HomeScreen(
+                        equipment = listOf(
+                            Equipment(
+                                id = 1,
+                                name = "Multímetro digital",
+                                category = "Medición",
+                                description = "Equipo para mediciones eléctricas.",
+                                state = EquipmentState.DISPONIBLE
+                            )
+                        ),
+                        availableOnly = false,
+                        lastSync = 0L,
+                        onFilter = {},
+                        onSync = {},
+                        onSelect = {},
+                        onLoans = {},
+                        onDevice = { showDevice.value = true }
+                    )
+                }
+            }
+        }
+
+        rule.onNodeWithText("PréstamoLab CTMA")
+            .fetchSemanticsNode()
+
+        rule.onNodeWithText("Multímetro digital")
+            .fetchSemanticsNode()
+
+        rule.onNodeWithText("Dispositivo")
+            .performClick()
+
+        rule.waitForIdle()
+
+        rule.onNodeWithText(
+            "Capacidad física adicional: energía y almacenamiento"
+        ).fetchSemanticsNode()
     }
 }

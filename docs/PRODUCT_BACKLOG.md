@@ -1,49 +1,31 @@
-# Product Backlog — PréstamoLab CTMA
+# Product Goal y Product Backlog
 
-> Las siguientes historias son una propuesta inicial para convertir los requisitos funcionales de la app en Issues. La guía no fija el texto exacto de las historias; por eso deben validarse con el Product Owner antes de crearlas en GitHub.
+## Product Goal
+Facilitar la consulta, solicitud, seguimiento y devolución trazable de equipos y herramientas de formación del CTMA mediante una aplicación Android segura, verificable y preparada para datos locales y servicios remotos.
 
-## HU-01 — Consultar equipos
-**Como** aprendiz, **quiero** consultar el listado de equipos y herramientas, **para** conocer qué recursos existen.
+| ID | Historia de Usuario | Prioridad | Estado código |
+|---|---|---:|---|
+| HU-01 | Como solicitante quiero consultar equipos disponibles para elegir un recurso. | Alta | Implementada |
+| HU-02 | Quiero consultar el detalle de un equipo por ID para conocer su información y estado. | Alta | Implementada |
+| HU-03 | Quiero solicitar un préstamo indicando destino, propósito y duración. | Alta | Implementada |
+| HU-04 | Quiero consultar mis préstamos para conocer su estado. | Alta | Implementada |
+| HU-05 | Quiero registrar una devolución para liberar el equipo. | Alta | Implementada |
+| HU-06 | Quiero conservar los datos localmente sin conexión. | Alta | Implementada con Room |
+| HU-07 | Quiero sincronizar el catálogo con un servicio remoto. | Media/Alta | Retrofit implementado + mock activo |
+| HU-08 | Quiero adjuntar evidencia fotográfica a una solicitud. | Media | Implementada con Photo Picker/URI |
+| HU-09 | Quiero recibir un recordatorio de devolución. | Media | Implementada con AlarmManager/notificación |
+| HU-10 | Quiero conocer batería/almacenamiento para validar capacidad del dispositivo. | Media | Implementada |
 
-**Criterios de aceptación**
-- Se muestra el listado de equipos.
-- Cada elemento muestra nombre, descripción y disponibilidad.
-
-## HU-02 — Consultar detalle
-**Como** aprendiz, **quiero** ver el detalle de un equipo, **para** conocer su información antes de solicitarlo.
-
-**Criterios de aceptación**
-- Al seleccionar un equipo se abre su detalle.
-- Se muestra el estado de disponibilidad.
-
-## HU-03 — Solicitar préstamo
-**Como** aprendiz, **quiero** solicitar el préstamo de un equipo disponible, **para** utilizarlo en mi formación.
-
-**Criterios de aceptación**
-- El botón de solicitud está habilitado cuando el equipo está disponible.
-- Al solicitarlo se confirma la operación.
-- El equipo pasa a estado no disponible.
-
-## HU-04 — Impedir préstamo no disponible
-**Como** sistema, **quiero** impedir solicitudes sobre equipos no disponibles, **para** evitar préstamos inválidos.
-
-**Criterios de aceptación**
-- Un equipo no disponible no puede solicitarse.
-- El repositorio rechaza una segunda solicitud del mismo equipo.
-
-## HU-05 — Mantener estado durante la navegación
-**Como** usuario, **quiero** conservar el equipo seleccionado y su estado al navegar entre pantallas, **para** tener una experiencia coherente.
-
-**Criterios de aceptación**
-- La navegación lleva del listado al detalle.
-- El detalle corresponde al equipo seleccionado.
-- Después de solicitar, el estado actualizado se refleja en pantalla.
-
-## HU-06 — Verificar calidad automáticamente
-**Como** equipo de desarrollo, **quiero** ejecutar compilación, pruebas y análisis de calidad automáticamente, **para** detectar errores antes de integrar cambios.
-
-**Criterios de aceptación**
-- GitHub Actions ejecuta `assembleDebug`.
-- GitHub Actions ejecuta `testDebugUnitTest`.
-- GitHub Actions ejecuta `lintDebug`.
-- Se conserva el APK como artifact.
+## Criterios de aceptación clave
+- CA-01 catálogo muestra nombre, categoría y estado textual.
+- CA-02 navegación transporta `equipmentId` y un ID inexistente no cierra la app.
+- CA-03 solo `DISPONIBLE` permite solicitud.
+- CA-04 destino no puede estar vacío.
+- CA-05 propósito: 10–180 caracteres.
+- CA-06 duración: 1–8 horas.
+- CA-07 doble pulsación no crea dos solicitudes.
+- CA-08 una solicitud activa reserva el equipo.
+- CA-09 solo `SOLICITADA` puede cancelarse.
+- CA-10 devolución libera el equipo.
+- CA-11 reiniciar la app conserva Room.
+- CA-12 evidencia se guarda como URI/metadatos.

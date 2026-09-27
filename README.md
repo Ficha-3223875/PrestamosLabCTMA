@@ -1,67 +1,69 @@
-# PréstamoLab CTMA
+# PréstamoLab CTMA · v0.6.0
 
-Aplicación Android para consultar equipos y herramientas de formación, solicitar préstamos y gestionar su estado.
+Proyecto integrador Android del SENA CTMA para consulta, solicitud, seguimiento y devolución de equipos/herramientas de formación. Esta versión evoluciona el incremento inicial y reúne las actividades de las guías integradoras: Scrum + Android + pruebas + Git/GitHub.
 
-## Arquitectura implementada
-- Kotlin + Jetpack Compose
-- Navigation Compose
-- ViewModel
-- StateFlow para el estado de UI
-- Repository en memoria
-- Reglas de negocio para disponibilidad
-- Pruebas unitarias
-- Prueba UI instrumentada
-- Android Lint
+## Funcionalidades
+- Catálogo de equipos con nombre, categoría, descripción y estado.
+- Detalle por `equipmentId`; un ID inexistente se maneja sin cierre abrupto.
+- Formulario de solicitud con ambiente/destino, propósito y duración.
+- Reglas: destino obligatorio, propósito 10–180 caracteres y duración 1–8 horas.
+- Prevención de doble guardado y de solicitudes activas duplicadas.
+- Pantalla **Mis préstamos** y detalle de solicitud.
+- Cancelación solo en estado `SOLICITADA`.
+- Registro de devolución y liberación del equipo.
+- Evidencia fotográfica mediante Photo Picker; se persiste la URI, no Bitmap/Base64.
+- Persistencia local con Room y preferencias con DataStore.
+- Estado reactivo con Flow/StateFlow y `collectAsStateWithLifecycle`.
+- Capa remota Retrofit/OkHttp y origen remoto simulado por defecto para que el prototipo funcione sin Internet.
+- Recordatorio de devolución con notificación/AlarmManager.
+- Capacidad física adicional: consulta de batería y almacenamiento libre del dispositivo.
+- GitHub Actions: build, pruebas unitarias, Lint y APK como artifact.
 
-## Herramientas GitHub preparadas
-La guía del producto propone verificar la cadena Historia de Usuario → criterios → código → pruebas → Pull Request → CI → defecto/corrección/regresión. Este proyecto incorpora:
-
-- Issues mediante plantillas de HU, bugs y tareas.
-- Pull Request template.
-- Product Backlog con 6 historias iniciales.
-- GitHub Actions para build, unit tests, Lint y artifacts/APK.
-- Workflow de CodeQL para Kotlin.
-- Dependabot para Gradle y GitHub Actions.
-- CODEOWNERS como plantilla.
-- Documentación paso a paso para configurar GitHub Projects, Issues, PRs y regresión.
-
-## Estructura relevante
+## Arquitectura
 ```text
-.github/
-  CODEOWNERS
-  dependabot.yml
-  pull_request_template.md
-  ISSUE_TEMPLATE/
-  workflows/
-    android.yml
-    codeql.yml
-docs/
-  PRODUCT_BACKLOG.md
-  GITHUB_SETUP.md
-app/
-  src/main/java/com/prestamolab/ctma/
-    MainActivity.kt
-    model/Equipment.kt
-    data/EquipmentRepository.kt
-    viewmodel/EquipmentViewModel.kt
-    ui/HomeScreen.kt
-    ui/DetailScreen.kt
-    ui/PrestamoLabApp.kt
-  src/test/...
-  src/androidTest/...
+Compose UI
+   ↓ eventos / ↑ UiState
+ViewModel + StateFlow
+   ↓
+Repository
+   ├─ Room (fuente local canónica)
+   ├─ DataStore (preferencias)
+   └─ RemoteDataSource
+        ├─ FakeRemoteDataSource (activo en el prototipo)
+        └─ Retrofit/OkHttp (implementado para integración real)
 ```
 
-## Ejecutar localmente
-Abre `PrestamoLabCTMA` en Android Studio y sincroniza Gradle.
+## Rutas principales
+`home` → `detail/{equipmentId}` → `request/{equipmentId}`
 
-Desde una terminal con Gradle 8.11.1:
-```bash
-gradle assembleDebug
-gradle testDebugUnitTest
-gradle lintDebug
-```
+`home` → `loans` → `loan/{loanId}`
 
-## GitHub
-Consulta `docs/GITHUB_SETUP.md` y `docs/GITHUB_CHECKLIST.md` para crear las Issues, el Project, los PRs y completar la configuración del repositorio.
+`home` → `device`
 
-> Nota: GitHub Projects, Issues, PRs, colaboradores y reglas del repositorio son configuraciones del servicio GitHub y no pueden quedar creadas dentro de un archivo ZIP. El proyecto incluye los archivos de configuración y plantillas necesarios para prepararlas.
+## Ejecutar
+1. Abrir esta carpeta en Android Studio.
+2. Sincronizar Gradle.
+3. Ejecutar en emulador/dispositivo con API 24 o superior.
+4. Para pruebas: `./gradlew testDebugUnitTest`, `./gradlew connectedDebugAndroidTest` y `./gradlew lintDebug`.
+
+> El proyecto usa Gradle Wrapper 8.11.1, JDK 17, compile/target SDK 35.
+
+## Datos y privacidad
+Todos los datos del catálogo son sintéticos. No se deben registrar nombres, documentos, credenciales o datos institucionales reales. La app usa Photo Picker y guarda URI/metadatos; no persiste imágenes como Base64. El manifiesto deshabilita tráfico HTTP en texto claro.
+
+## Evidencias y documentación
+- `docs/PRODUCT_BACKLOG.md`
+- `docs/SPRINT_SCRUM.md`
+- `docs/RIESGOS.md`
+- `docs/PLAN_PRUEBAS.md`
+- `docs/MATRIZ_TRAZABILIDAD.md`
+- `docs/ARQUITECTURA.md`
+- `docs/TDD.md`
+- `docs/SEGURIDAD_PRIVACIDAD.md`
+- `docs/CAPACIDAD_DISPOSITIVO.md`
+- `docs/REGRESION.md`
+- `docs/INFORME_CALIDAD.md`
+- `docs/GITHUB_SETUP.md`
+
+## Limitación importante
+Issues, GitHub Project, Pull Requests, reviews, Actions ejecutadas, tags y evidencias reales de dispositivo viven en GitHub o se generan al ejecutar el proyecto; no se pueden fabricar dentro de un ZIP. El repositorio contiene plantillas, workflows y matrices para completar esa evidencia de forma trazable.

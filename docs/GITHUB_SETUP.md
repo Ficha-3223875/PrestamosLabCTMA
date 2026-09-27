@@ -1,66 +1,14 @@
-# Configuración de herramientas GitHub
+# Configuración GitHub obligatoria
 
-La guía de PréstamoLab propone relacionar Historia de Usuario → criterios de aceptación → código → pruebas → Pull Request → CI → defecto/corrección/regresión.
+1. Subir este mismo repositorio; no crear un proyecto Android nuevo.
+2. Crear/actualizar GitHub Project con columnas Backlog / Ready / In Progress / Review / Done.
+3. Crear Issues HU-01..HU-10 usando `.github/ISSUE_TEMPLATE/user-story.md` y copiar criterios desde `PRODUCT_BACKLOG.md`.
+4. Crear Issues BUG solo para fallas realmente reproduccidas.
+5. Trabajar en ramas `feature/hu-XX-descripcion` o `fix/bug-XX-descripcion`.
+6. Abrir PR con `Closes #N`, riesgos y TC relacionados.
+7. Esperar Actions: build + unit tests + lint.
+8. Hacer code review, corregir y mergear a `main`.
+9. Crear tags/incrementos: `v0.2.0` a `v0.6.0` si el instructor mantiene la convención sugerida.
+10. Adjuntar evidencia real de ejecución/screenshots en Issues/PR o carpeta acordada.
 
-## 1. Repositorio
-1. Crea un repositorio GitHub llamado `PrestamoLabCTMA`.
-2. Sube el contenido de esta carpeta.
-3. Trabaja con ramas para cada historia, por ejemplo `feature/HU-01-consultar-equipos`.
-
-## 2. Issues
-Crea una Issue por cada HU de `docs/PRODUCT_BACKLOG.md`.
-Usa la plantilla **Historia de usuario**.
-Para defectos, usa **Defecto / Bug**.
-Vincula el PR con la Issue usando, por ejemplo, `Closes #12`.
-
-## 3. GitHub Projects
-Crea un Project asociado al repositorio.
-Puedes usar vista Board/Kanban con estados:
-- Backlog
-- Ready
-- In progress
-- In review
-- Done
-
-Añade campos como Prioridad, Sprint y Tipo. Agrega las Issues de las seis HU.
-
-## 4. Pull Requests
-Cada HU debe implementarse mediante un PR.
-En la descripción del PR:
-- indica `Closes #N`;
-- marca los criterios de aceptación;
-- adjunta evidencia;
-- indica las pruebas ejecutadas.
-
-## 5. GitHub Actions
-`.github/workflows/android.yml` ejecuta:
-- compilación `assembleDebug`;
-- pruebas unitarias `testDebugUnitTest`;
-- Android Lint `lintDebug`;
-- conservación del APK y reportes como artifacts.
-
-`.github/workflows/codeql.yml` agrega análisis CodeQL para Kotlin.
-
-## 6. Dependabot
-`.github/dependabot.yml` revisa semanalmente dependencias Gradle y mensualmente GitHub Actions.
-
-## 7. CODEOWNERS
-Edita `.github/CODEOWNERS` y reemplaza `@TU_USUARIO_GITHUB` por el usuario o equipo real que deba revisar el código.
-
-## 8. Branch protection
-La guía señala una limitación de GitHub Free para repositorios privados respecto a reglas obligatorias de protección y checks requeridos. Configura las reglas disponibles según el tipo de repositorio y plan que use el equipo.
-
-## 9. Revisión y regresión
-Cuando se detecte un defecto:
-1. crea una Issue `[BUG]`;
-2. corrige en una rama;
-3. agrega/actualiza una prueba que reproduzca el problema;
-4. abre PR;
-5. espera a que Actions compile, pruebe y ejecute Lint;
-6. integra la corrección y verifica la regresión.
-
-## 10. Insights
-Usa la sección Insights del repositorio para revisar actividad, commits, contribuciones y evolución del trabajo.
-
-### Importante
-GitHub Projects, Issues, Pull Requests, colaboradores y configuración de protección de ramas son elementos del repositorio en GitHub; no se pueden crear realmente dentro de un ZIP. Este proyecto deja las plantillas y documentación preparadas para configurarlos.
+`CODEOWNERS` usa `@solorzanos213` como responsable inicial; si el trabajo es grupal, agregar los usuarios GitHub del equipo.
