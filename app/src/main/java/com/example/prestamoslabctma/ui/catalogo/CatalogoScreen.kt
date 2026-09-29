@@ -33,8 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import com.example.prestamoslabctma.model.CategoriaEquipo
 import com.example.prestamoslabctma.model.Equipo
 import com.example.prestamoslabctma.model.EstadoEquipo
@@ -94,9 +92,7 @@ fun CatalogoScreen(
             color = MaterialTheme.colorScheme.primary
         )
 
-        Spacer(
-            modifier = Modifier.height(6.dp)
-        )
+        Spacer(modifier = Modifier.height(6.dp))
 
         Text(
             text = "Catálogo de equipos",
@@ -104,9 +100,7 @@ fun CatalogoScreen(
             fontWeight = FontWeight.Bold
         )
 
-        Spacer(
-            modifier = Modifier.height(6.dp)
-        )
+        Spacer(modifier = Modifier.height(6.dp))
 
         Text(
             text = "Consulta los equipos disponibles para solicitar un préstamo.",
@@ -114,9 +108,7 @@ fun CatalogoScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Spacer(
-            modifier = Modifier.height(16.dp)
-        )
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = onMisSolicitudesClick,
@@ -129,13 +121,7 @@ fun CatalogoScreen(
             )
         }
 
-        Spacer(
-            modifier = Modifier.height(16.dp)
-        )
-
-        // =========================
-        // BÚSQUEDA - HU-11
-        // =========================
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = textoBusqueda,
@@ -153,69 +139,54 @@ fun CatalogoScreen(
             shape = RoundedCornerShape(14.dp)
         )
 
-        Spacer(
-            modifier = Modifier.height(12.dp)
-        )
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // =========================
-        // FILTRO - HU-12
-        // =========================
+        OutlinedButton(
+            onClick = {
+                menuCategoriaAbierto = true
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp)
+        ) {
+            Text(
+                text = categoriaSeleccionada?.let {
+                    "Categoría: ${textoCategoria(it)}"
+                } ?: "Filtrar por categoría"
+            )
+        }
 
-        Column(
-            modifier = Modifier.fillMaxWidth()
+        DropdownMenu(
+            expanded = menuCategoriaAbierto,
+            onDismissRequest = {
+                menuCategoriaAbierto = false
+            }
         ) {
 
-            OutlinedButton(
-                onClick = {
-                    menuCategoriaAbierto = true
+            DropdownMenuItem(
+                text = {
+                    Text("Todas las categorías")
                 },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp)
-            ) {
-                Text(
-                    text = categoriaSeleccionada?.let {
-                        "Categoría: ${textoCategoria(it)}"
-                    } ?: "Filtrar por categoría"
-                )
-            }
-
-            DropdownMenu(
-                expanded = menuCategoriaAbierto,
-                onDismissRequest = {
+                onClick = {
+                    categoriaSeleccionada = null
                     menuCategoriaAbierto = false
                 }
-            ) {
+            )
+
+            CategoriaEquipo.entries.forEach { categoria ->
 
                 DropdownMenuItem(
                     text = {
-                        Text("Todas las categorías")
+                        Text(textoCategoria(categoria))
                     },
                     onClick = {
-                        categoriaSeleccionada = null
+                        categoriaSeleccionada = categoria
                         menuCategoriaAbierto = false
                     }
                 )
-
-                CategoriaEquipo.entries.forEach { categoria ->
-
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                textoCategoria(categoria)
-                            )
-                        },
-                        onClick = {
-                            categoriaSeleccionada = categoria
-                            menuCategoriaAbierto = false
-                        }
-                    )
-                }
             }
         }
 
-        Spacer(
-            modifier = Modifier.height(18.dp)
-        )
+        Spacer(modifier = Modifier.height(18.dp))
 
         Text(
             text = "Equipos",
@@ -223,9 +194,7 @@ fun CatalogoScreen(
             fontWeight = FontWeight.Bold
         )
 
-        Spacer(
-            modifier = Modifier.height(10.dp)
-        )
+        Spacer(modifier = Modifier.height(10.dp))
 
         if (equiposFiltrados.isEmpty()) {
 
@@ -234,6 +203,7 @@ fun CatalogoScreen(
                 shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.surfaceVariant
             ) {
+
                 Column(
                     modifier = Modifier.padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -245,9 +215,7 @@ fun CatalogoScreen(
                         fontWeight = FontWeight.Bold
                     )
 
-                    Spacer(
-                        modifier = Modifier.height(6.dp)
-                    )
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
                         text = "Prueba con otro nombre o categoría.",
@@ -305,9 +273,7 @@ private fun EquipoCard(
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(
-                modifier = Modifier.height(8.dp)
-            )
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = "Categoría: ${textoCategoria(equipo.categoria)}",
@@ -315,9 +281,7 @@ private fun EquipoCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(
-                modifier = Modifier.height(12.dp)
-            )
+            Spacer(modifier = Modifier.height(12.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -329,18 +293,14 @@ private fun EquipoCard(
                     fontWeight = FontWeight.SemiBold
                 )
 
-                Spacer(
-                    modifier = Modifier.width(8.dp)
-                )
+                Spacer(modifier = Modifier.width(8.dp))
 
                 EstadoChip(
                     estado = equipo.estado
                 )
             }
 
-            Spacer(
-                modifier = Modifier.height(14.dp)
-            )
+            Spacer(modifier = Modifier.height(14.dp))
 
             Text(
                 text = "Toca para ver el detalle",
